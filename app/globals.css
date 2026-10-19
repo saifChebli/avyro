@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #05070d;
+  --color-panel: #0b1020;
+  --color-text: #e8ecf5;
+  --color-muted: #aeb4c2;  /* body copy: 9.7:1 on ink, 9.1:1 on panel */
+  --color-subtle: #8a91a1; /* meta labels: 6.4:1 on ink, 6.0:1 on panel */
+  --color-sidi: #5b82ff;
+  --color-mint: #bfe6d4;
+  --color-harissa: #ff5a3c;
+  --font-display: var(--font-bricolage), system-ui, sans-serif;
+  --font-sans: var(--font-instrument), system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+}
+
+html { scroll-behavior: smooth; scroll-padding-top: 5rem; color-scheme: dark; }
+body { background: var(--color-ink); color: var(--color-text); font-family: var(--font-sans); }
+:focus-visible { outline: 3px solid var(--color-harissa); outline-offset: 3px; }
+::selection { background: var(--color-sidi); color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* FR <-> EN switch: the page cross-fades and the headline morphs between languages. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+#hero-title { view-transition-name: hero-title; }
+::view-transition-old(root) { animation: vt-out .3s ease both; }
+::view-transition-new(root) { animation: vt-in .45s ease both; }
+@keyframes vt-out { to { opacity: 0; filter: blur(8px); transform: scale(.985); } }
+@keyframes vt-in { from { opacity: 0; filter: blur(8px); transform: scale(1.015); } }
+
+/* Fixed header: transparent over the hero, frosted once the page scrolls.
+   Without scroll-driven animations it is simply always frosted. */
+.site-header {
+  background: rgb(5 7 13 / .72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgb(255 255 255 / .08);
+}
+@supports (animation-timeline: scroll()) {
+  .site-header { animation: header-solid linear both; animation-timeline: scroll(); animation-range: 0 180px; }
+}
+@keyframes header-solid {
+  from { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom-color: transparent; }
+}
+
+/* FAQ: hide the native disclosure triangle (a rotating + replaces it). */
+summary::-webkit-details-marker { display: none; }
+
+/* Pointer effects (driven by components/Interactions.tsx, mouse only). */
+@media (hover: hover) and (pointer: fine) {
+  .spot { background-image: radial-gradient(380px circle at var(--mx, -999px) var(--my, -999px), rgb(91 130 255 / .16), transparent 65%); }
+  .tilt { transition: transform .15s ease-out; will-change: transform; }
+  .magnetic { transition: transform .2s ease-out, background-color .15s; }
+}
+
+/* Skip layout/paint of below-the-fold sections until they are near the viewport. */
+.defer { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+
+/* Statement: lights up in reading order as it scrolls through the viewport.
+   The inline span's background runs across line breaks, so the fill follows the words.
+   Browsers without scroll-driven animations (or reduced motion) just show plain text. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .statement { view-timeline: --statement; }
+    .statement span {
+      color: transparent;
+      background-image: linear-gradient(var(--color-text), var(--color-text)), linear-gradient(rgb(232 236 245 / .16), rgb(232 236 245 / .16));
+      background-size: 0% 100%, 100% 100%;
+      background-repeat: no-repeat;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: statement linear both;
+      animation-timeline: --statement;
+      animation-range: cover 20% cover 60%;
+    }
+  }
+}
+@keyframes statement { to { background-size: 100% 100%, 100% 100%; } }
+
+/* Industries marquee: two identical lists slide by exactly one list width. */
+@keyframes marquee { to { transform: translateX(-50%); } }
+.marquee { animation: marquee 45s linear infinite; }
+.marquee:hover, section:has(.marquee-toggle:checked) .marquee { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .marquee { animation: none; width: auto; flex-wrap: wrap; padding-inline: 1.25rem; }
+  .marquee ul[aria-hidden] { display: none; }
+}
+
+/* Process timeline: a rail (left on mobile, centred zig-zag from md) that fills as you scroll;
+   each card slides in from its side and its dot lights up when the step reaches mid-screen.
+   Animations only touch transform/filter/colour of decoration, so text contrast is never reduced. */
+.timeline { position: relative; }
+.timeline::before, .timeline::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 11px; width: 2px;
+  background: rgb(255 255 255 / .12);
+}
+.timeline::after { background: linear-gradient(var(--color-sidi), var(--color-mint)); transform-origin: top; }
+.timeline > li { position: relative; padding-left: 3rem; }
+.timeline > li::before {
+  content: ""; position: absolute; left: 0; top: 2.25rem; width: 24px; height: 24px; z-index: 1;
+  border-radius: 999px; border: 2px solid var(--color-sidi); background: var(--color-ink);
+}
+@media (min-width: 768px) {
+  .timeline::before, .timeline::after { left: calc(50% - 1px); }
+  .timeline > li { width: 50%; padding-left: 0; padding-right: 4rem; }
+  .timeline > li:nth-child(even) { margin-left: 50%; padding-right: 0; padding-left: 4rem; }
+  .timeline > li::before { left: auto; right: -12px; }
+  .timeline > li:nth-child(even)::before { right: auto; left: -12px; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .timeline { view-timeline: --timeline; }
+    .timeline::after { animation: rail linear both; animation-timeline: --timeline; animation-range: cover 10% cover 75%; }
+    .timeline > li { view-timeline: --step; }
+    .timeline > li > .step { animation: step-in linear both; animation-timeline: --step; animation-range: entry 0% cover 40%; }
+    .timeline > li:nth-child(even) > .step { animation-name: step-in-right; }
+    .timeline > li::before { animation: dot linear both; animation-timeline: --step; animation-range: cover 35% cover 50%; }
+  }
+}
+@keyframes rail { from { transform: scaleY(0); } }
+@keyframes step-in { from { transform: translateX(-56px) scale(.94); filter: blur(10px); } }
+@keyframes step-in-right { from { transform: translateX(56px) scale(.94); filter: blur(10px); } }
+@keyframes dot { to { background: var(--color-sidi); box-shadow: 0 0 0 6px rgb(91 130 255 / .2), 0 0 28px var(--color-sidi); } }
