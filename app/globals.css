@@ -58,6 +58,42 @@ summary::-webkit-details-marker { display: none; }
   .magnetic { transition: transform .2s ease-out, background-color .15s; }
 }
 
+/* Lenis smooth scroll (rules from lenis/dist/lenis.css that this page needs). Iframes (ThreeUI scenes)
+   must not swallow wheel events while Lenis drives scrolling. */
+html.lenis, html.lenis body { height: auto; }
+html.lenis { scroll-behavior: auto; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* First-visit intro (~0.85 s): the wordmark sharpens out of a skewed blur, then the panel wipes up.
+   Letters are visible from the first frame and the wipe starts early: anything under a full-screen
+   overlay is not reported as painted until uncovered, so a long intro would delay FCP/LCP. */
+.preloader {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-items: center;
+  background: var(--color-ink); pointer-events: none;
+  animation: pre-wipe .5s cubic-bezier(.76,0,.24,1) .35s forwards;
+}
+.preloader > span { display: inline-flex; }
+.preloader > span > span { display: inline-block; animation: pre-rise .45s cubic-bezier(.2,.7,.2,1) calc(var(--i) * 40ms) both; }
+@keyframes pre-rise { from { transform: translateY(18%) skewY(8deg); filter: blur(10px); } }
+@keyframes pre-wipe { to { clip-path: inset(0 0 100% 0); visibility: hidden; } }
+html.seen .preloader, html:not(.js) .preloader { display: none; }
+@media (prefers-reduced-motion: reduce) { .preloader { display: none; } }
+
+/* Hero story: statements share one grid cell. Until motion starts (or without it) only the h1 is
+   visible; the other statements stay available to screen readers. */
+.story { display: grid; align-items: end; }
+.story > * { grid-area: 1 / 1; }
+.hero:not(.live) .story > :not(:first-child) {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+.story-progress { display: none; }
+.hero.live .story-progress { display: flex; }
+
+/* Headings wait (transparent, but still in the layout and accessibility tree) until Motion
+   reveals them line by line. */
+html.motion main h2 { opacity: 0; }
+@media print { html.motion main h2 { opacity: 1 !important; } }
+
 /* Skip layout/paint of below-the-fold sections until they are near the viewport. */
 .defer { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 

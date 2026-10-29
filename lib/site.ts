@@ -34,6 +34,7 @@ export type Copy = {
   switchAria: string;
   waShort: string;
   h1: string;
+  story: string[]; // statements that follow the h1 in the pinned hero
   sub: string;
   cta: string;
   reply: string;
@@ -77,6 +78,7 @@ export const copy: Record<Lang, Copy> = {
     switchAria: "Read this page in English",
     waShort: "whatsapp",
     h1: "Votre travail est meilleur que votre site.",
+    story: ["Vos abonnés vous regardent.", "Mais ils n'achètent pas.", "On transforme ce regard en chiffre d'affaires."],
     sub: "Vos abonnés vous suivent, mais ils n'achètent pas. Nous créons le site, l'image de marque et les campagnes qui les transforment en clients.",
     cta: "Parlons-en sur WhatsApp",
     reply: "réponse sous 24 h",
@@ -145,6 +147,7 @@ export const copy: Record<Lang, Copy> = {
     switchAria: "Lire cette page en français",
     waShort: "whatsapp",
     h1: "Your work is better than your website.",
+    story: ["Your followers are watching.", "But they don't buy.", "We turn that attention into revenue."],
     sub: "Your followers like what you do, but they don't buy. We build the website, the brand and the campaigns that turn them into customers.",
     cta: "Let's talk on WhatsApp",
     reply: "we reply within 24 h",

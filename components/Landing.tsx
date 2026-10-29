@@ -1,8 +1,12 @@
 import Backdrop from "@/components/Backdrop";
 import Interactions from "@/components/Interactions";
 import MoneyCalculator from "@/components/MoneyCalculator";
+import Motion from "@/components/Motion";
 import { copy, waLink, type Lang } from "@/lib/site";
 import { afterHeading, body, card, cardFeatured, cardShape, container, cta, h2, h3, label, lead, navLink, pill, section } from "@/lib/ui";
+
+const storyText =
+  "max-w-5xl text-balance font-display text-[clamp(2.5rem,8vw,7.5rem)] font-extrabold leading-[0.92] tracking-tight";
 
 export default function Landing({ lang }: { lang: Lang }) {
   const c = copy[lang];
@@ -14,6 +18,15 @@ export default function Landing({ lang }: { lang: Lang }) {
 
   return (
     <>
+      {/* First-visit intro (pure CSS; hidden on repeat visits and for reduced motion). */}
+      <div className="preloader" aria-hidden="true">
+        <span className="font-display text-6xl font-extrabold tracking-tight sm:text-8xl">
+          {"avyro".split("").map((ch, i) => (
+            <span key={i} style={{ "--i": i } as React.CSSProperties}>{ch}</span>
+          ))}
+        </span>
+      </div>
+
       <a
         href="#main"
         className="fixed left-4 top-4 z-50 -translate-y-24 rounded-full bg-white px-5 py-3 font-bold text-ink focus:translate-y-0"
@@ -39,20 +52,30 @@ export default function Landing({ lang }: { lang: Lang }) {
       </header>
 
       <main id="main">
-        {/* Hero */}
-        <section aria-labelledby="hero-title" className="relative flex min-h-svh items-end overflow-hidden">
+        {/* Hero: pinned scroll story (see components/Motion.tsx). Without motion only the h1 shows. */}
+        <section aria-labelledby="hero-title" className="hero relative h-svh min-h-140 overflow-hidden">
           <Backdrop kind="arc" />
           <div className="absolute inset-0 bg-linear-to-t from-ink via-ink/40 to-transparent" />
-          <div className={`${container} relative z-10 pb-16 pt-40 sm:pb-24`}>
-            <h1 id="hero-title" className="max-w-5xl text-balance font-display text-[clamp(2.75rem,9vw,8.5rem)] font-extrabold leading-[0.92] tracking-tight">
-              {c.h1}
-            </h1>
-            <div className="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+          <div className={`${container} relative z-10 flex h-full flex-col justify-end pb-8 pt-28 sm:pb-12`}>
+            <div className="story">
+              <h1 id="hero-title" className={storyText}>{c.h1}</h1>
+              {c.story.map((s) => (
+                <p key={s} className={storyText}>{s}</p>
+              ))}
+            </div>
+            <div className="mt-8 flex flex-col gap-6 sm:mt-10 md:flex-row md:items-end md:justify-between">
               <p className="max-w-xl text-pretty text-lg text-muted">{c.sub}</p>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
                 <a href={wa} className={cta}>{c.cta}</a>
                 <span className={label}>{c.reply}</span>
               </div>
+            </div>
+            <div className="story-progress mt-8 items-center gap-4 font-mono text-sm text-subtle" aria-hidden="true">
+              <span className="story-count tabular-nums">01</span>
+              <span className="relative h-px flex-1 bg-white/15">
+                <span className="story-bar absolute inset-0 origin-left scale-x-0 bg-sidi" />
+              </span>
+              <span className="tabular-nums">{String(c.story.length + 1).padStart(2, "0")}</span>
             </div>
           </div>
         </section>
@@ -204,6 +227,7 @@ export default function Landing({ lang }: { lang: Lang }) {
         </div>
       </footer>
       <Interactions />
+      <Motion />
     </>
   );
 }

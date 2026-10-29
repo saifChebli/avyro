@@ -18,6 +18,9 @@ export const pageMeta = (lang: Lang) => {
   };
 };
 
+const bootScript =
+  "var d=document.documentElement;d.classList.add('js');try{if(sessionStorage.getItem('avyro-seen'))d.classList.add('seen');sessionStorage.setItem('avyro-seen','1')}catch(e){}";
+
 export default function Shell({ lang, children }: { lang: Lang; children: React.ReactNode }) {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -30,7 +33,12 @@ export default function Shell({ lang, children }: { lang: Lang; children: React.
     priceRange: "TND",
   };
   return (
-    <html lang={lang} className={`${display.variable} ${sans.variable}`}>
+    // suppressHydrationWarning: the inline script below adds classes to <html> before React hydrates.
+    <html lang={lang} className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Runs before first paint: "js" enables motion-only styles; "seen" skips the intro on repeat visits. */}
+        <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+      </head>
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         {children}
